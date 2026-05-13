@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+games/*.sb3
+games/*.json
+sessions/*.json
+videos/*
+photos/*
+passports/counter.json
+!**/.gitkeep
+venv/
+.venv/

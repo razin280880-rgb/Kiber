@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Готово — {{ record.child_name }} · KIBERone{% endblock %}
+{% block content %}
+<div class="admin-page">
+
+  <header class="admin-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН · админка</span></div>
+    <a class="link-muted" href="{{ url_for('admin_home') }}">← На главную</a>
+  </header>
+
+  <section class="admin-card success-card">
+    <div class="success-badge">✓</div>
+    <h1>Страница игры готова</h1>
+    <p class="muted">Покажи родителю — пусть отсканирует QR с телефона. Игра откроется сразу.</p>
+
+    <div class="share-block">
+      <div class="qr-wrapper">
+        <img src="{{ qr_url }}" alt="QR-код">
+        <p class="muted">Отсканируй камерой телефона</p>
+      </div>
+
+      <div class="share-info">
+        <p class="muted">Ссылка на игру:</p>
+        <div class="copy-row">
+          <input type="text" readonly value="{{ share_url }}" id="share-url-input">
+          <button class="btn btn-ghost" id="copy-share-btn">Копировать</button>
+        </div>
+
+        <a href="{{ share_url }}" target="_blank" class="btn btn-primary btn-large">
+          Открыть страницу игры →
+        </a>
+
+        <div class="kid-info">
+          <p><strong>{{ record.child_name }}</strong>, {{ record.child_age }} лет · {{ record.grade }}</p>
+          <p class="muted">Наставник: {{ record.tutor_name }} · {{ record.filial }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  document.getElementById('copy-share-btn').addEventListener('click', async () => {
+    const input = document.getElementById('share-url-input');
+    try {
+      await navigator.clipboard.writeText(input.value);
+      const btn = document.getElementById('copy-share-btn');
+      btn.textContent = 'Скопировано ✓';
+      setTimeout(() => { btn.textContent = 'Копировать'; }, 1500);
+    } catch (e) {
+      input.select();
+      document.execCommand('copy');
+    }
+  });
+</script>
+{% endblock %}

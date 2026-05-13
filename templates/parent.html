@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}{{ session.child_name }} на пробном · KIBERone{% endblock %}
+{% block content %}
+<div class="parent-page">
+
+  <header class="game-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН</span></div>
+  </header>
+
+  <section class="hero">
+    <p class="hero-eyebrow">Прямо сейчас на уроке</p>
+    <h1 class="hero-name" id="child-name">{{ session.child_name }}</h1>
+    <p class="hero-meta">{{ session.child_age }} лет · {{ session.grade }} · {{ session.filial }}</p>
+  </section>
+
+  <section class="status-card" id="status-card" data-finished="{{ 'true' if session.is_finished else 'false' }}">
+    {% if session.is_finished %}
+      <div class="status-pill done">🏁 Урок завершён</div>
+    {% else %}
+      <div class="status-pill live">
+        <span class="live-dot"></span>
+        Урок идёт
+      </div>
+    {% endif %}
+    <p class="status-current" id="status-current">
+      {% if session.checkpoints %}
+        {% set last_id = session.checkpoints[-1].id %}
+        {% for c in checkpoints if c.id == last_id %}{{ c.parent_message }}{% endfor %}
+      {% else %}
+        Готовимся к старту…
+      {% endif %}
+    </p>
+  </section>
+
+  <section class="parent-progress">
+    <div class="parent-progress-head">
+      <h3>Прогресс</h3>
+      <span class="muted" id="progress-counter">{{ done_ids|length }}/{{ total }}</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: {{ (done_ids|length / total * 100) | round(0) }}%"></div>
+    </div>
+    <ul class="parent-checkpoints" id="parent-checkpoints">
+      {% for cp in checkpoints %}
+        <li class="{% if cp.id in done_ids %}done{% endif %}" data-cp="{{ cp.id }}">
+          <span class="cp-dot">{{ '✓' if cp.id in done_ids else '○' }}</span>
+          <span class="cp-emoji">{{ cp.emoji }}</span>
+          <span class="cp-text">{{ cp.title_parent }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="parent-test-cta {% if session.parent_test %}done{% endif %}">
+    {% if session.parent_test %}
+      <h3>✓ Тест пройден</h3>
+      <p>Рекомендуемое направление: <strong>{{ session.parent_test.result_label }}</strong></p>
+      <a class="btn btn-ghost" href="{{ url_for('parent_result', token=session.token) }}">Посмотреть результат →</a>
+    {% else %}
+      <h3>Пока ребёнок занят — пройди тест</h3>
+      <p>5 вопросов о ребёнке. За 2 минуты узнаешь, какое из 4 направлений KIBERone подходит лучше всего.</p>
+      <a class="btn btn-primary btn-large" href="{{ url_for('parent_test', token=session.token) }}">Начать тест</a>
+    {% endif %}
+  </section>
+
+  {% if session.is_finished and session.video_filename %}
+  <section class="parent-replay">
+    <h3>📹 Запись с урока</h3>
+    <video controls playsinline preload="metadata" class="parent-video">
+      <source src="{{ url_for('parent_video', token=session.token) }}">
+      Ваш браузер не поддерживает встроенное видео.
+    </video>
+  </section>
+  {% endif %}
+
+  {% if session.is_finished and session.game_slug %}
+  <section class="parent-game-ready">
+    <h3>🎉 Игра готова!</h3>
+    <p>{{ session.child_name }} создал(а) свою первую игру. Открывай и играй!</p>
+    <a class="btn btn-primary btn-large" href="{{ url_for('game_page', slug=session.game_slug) }}">
+      Открыть игру →
+    </a>
+  </section>
+  {% endif %}
+
+  {% if session.report_data %}
+  <section class="parent-report-ready">
+    <h3>📄 Персональный отчёт готов</h3>
+    <p>Разбор урока, наблюдения и рекомендации по {{ session.child_name }}.</p>
+    <a class="btn btn-primary btn-large" href="{{ url_for('parent_report', token=session.token) }}">
+      Открыть отчёт →
+    </a>
+  </section>
+  {% endif %}
+
+  {% if session.is_finished and session.passport_serial %}
+  <section class="parent-profile-link">
+    <h3>🎫 Профиль разработчика</h3>
+    <p>{{ session.child_name }} теперь в KIBERone. По QR с паспорта открывается живой профиль с проектами и достижениями.</p>
+    <a class="btn btn-ghost" href="{{ url_for('dev_profile', token=session.token) }}">
+      Открыть профиль →
+    </a>
+  </section>
+  {% endif %}
+
+  <footer class="game-footer">
+    <p>© KIBERone · IT-академия для детей 6–14 лет</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const STATUS_URL = {{ url_for('parent_status', token=session.token) | tojson }};
+  const TEST_URL = {{ url_for('parent_test', token=session.token) | tojson }};
+  const POLL_INTERVAL_MS = 4000;
+
+  const cpMessages = {
+    {% for c in checkpoints %}
+      {{ c.id | tojson }}: {{ c.parent_message | tojson }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+  };
+
+  const statusCard = document.getElementById('status-card');
+  const statusCurrent = document.getElementById('status-current');
+  const progressFill = document.getElementById('progress-fill');
+  const progressCounter = document.getElementById('progress-counter');
+  const cpList = document.getElementById('parent-checkpoints');
+
+  let lastLatestId = null;
+  let pollTimer = null;
+
+  async function poll() {
+    try {
+      const res = await fetch(STATUS_URL, { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // Прогресс
+      const pct = Math.round((data.done_count / data.total_count) * 100);
+      progressFill.style.width = pct + '%';
+      progressCounter.textContent = `${data.done_count}/${data.total_count}`;
+
+      // Чекпойнты
+      const done = new Set(data.done_ids);
+      cpList.querySelectorAll('li').forEach(li => {
+        const id = li.dataset.cp;
+        const dot = li.querySelector('.cp-dot');
+        if (done.has(id)) {
+          if (!li.classList.contains('done')) {
+            li.classList.add('done', 'just-done');
+            setTimeout(() => li.classList.remove('just-done'), 1500);
+          }
+          dot.textContent = '✓';
+        } else {
+          li.classList.remove('done');
+          dot.textContent = '○';
+        }
+      });
+
+      // Текущее сообщение
+      if (data.latest_id && data.latest_id !== lastLatestId) {
+        lastLatestId = data.latest_id;
+        statusCurrent.textContent = cpMessages[data.latest_id] || '...';
+        statusCurrent.classList.add('pulse');
+        setTimeout(() => statusCurrent.classList.remove('pulse'), 1500);
+      }
+
+      // Финиш
+      if (data.finished && statusCard.dataset.finished !== 'true') {
+        // Перезагружаем страницу — покажется секция «Игра готова»
+        location.reload();
+      }
+    } catch (e) {
+      // молчаливо игнорируем — сетевая ошибка не должна шуметь родителю
+    }
+  }
+
+  if (statusCard.dataset.finished !== 'true') {
+    poll();
+    pollTimer = setInterval(poll, POLL_INTERVAL_MS);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      } else if (!document.hidden && !pollTimer) {
+        poll();
+        pollTimer = setInterval(poll, POLL_INTERVAL_MS);
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

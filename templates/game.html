@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}{{ record.child_name }} — моя первая игра в KIBERone{% endblock %}
+{% block og_title %}{{ record.child_name }} создал(а) свою первую игру!{% endblock %}
+{% block og_description %}Пробный урок KIBERone — играй прямо в браузере{% endblock %}
+
+{% block content %}
+<div class="game-page">
+
+  <header class="game-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН</span></div>
+  </header>
+
+  <section class="hero">
+    <p class="hero-eyebrow">Это игра, которую создал(а)</p>
+    <h1 class="hero-name">{{ record.child_name }}</h1>
+    <p class="hero-meta">{{ record.child_age }} лет · {{ record.filial }} · сегодня</p>
+  </section>
+
+  <section class="player-section">
+    <div class="player-frame">
+      <div id="player" class="player"></div>
+      <div id="player-loader" class="player-loader">
+        <div class="spinner"></div>
+        <p>Загружаем игру…</p>
+      </div>
+    </div>
+    <div class="player-hint">
+      <button id="green-flag" class="btn btn-primary">▶ Старт</button>
+      <button id="stop-all" class="btn btn-ghost">■ Стоп</button>
+      <button id="fullscreen" class="btn btn-ghost">⤢ На весь экран</button>
+    </div>
+  </section>
+
+  <section class="certificate">
+    <div class="cert-inner">
+      <div class="cert-badge">🏆</div>
+      <p class="cert-eyebrow">Сертификат</p>
+      <h2 class="cert-title">{{ record.child_name }}</h2>
+      <p class="cert-text">
+        Создал(а) свою первую компьютерную игру<br>
+        на пробном уроке <strong>KIBERone ИгроВАН</strong>
+      </p>
+      <div class="cert-footer">
+        <div>
+          <p class="cert-label">Наставник</p>
+          <p class="cert-value">{{ record.tutor_name }}</p>
+        </div>
+        <div>
+          <p class="cert-label">Филиал</p>
+          <p class="cert-value">{{ record.filial }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="share">
+    <h3>Покажи всем!</h3>
+    <p>Отправь игру бабушке, папе, друзьям — пусть они тоже сыграют</p>
+    <div class="share-buttons">
+      <a class="btn btn-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener">
+        WhatsApp
+      </a>
+      <a class="btn btn-telegram" href="{{ telegram_url }}" target="_blank" rel="noopener">
+        Telegram
+      </a>
+      <button class="btn btn-ghost" id="copy-link" data-url="{{ share_url }}">
+        Скопировать ссылку
+      </button>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h3>Понравилось?</h3>
+    <p>На основном курсе KIBERone {{ record.child_name }} научится создавать игры
+       сложнее, делать сайты, писать на Python и собирать AI-проекты.</p>
+    <a href="https://kiberone.ru" class="btn btn-primary btn-large">Узнать о курсе</a>
+  </section>
+
+  <footer class="game-footer">
+    <p>© KIBERone · IT-академия для детей 6–14 лет</p>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/@turbowarp/scaffolding@1/dist/scaffolding-full.js"></script>
+<script>
+  (function () {
+    const SB3_URL = {{ sb3_url | tojson }};
+    const loader = document.getElementById('player-loader');
+    const playerEl = document.getElementById('player');
+
+    const scaffolding = new Scaffolding.Scaffolding();
+    scaffolding.width = 480;
+    scaffolding.height = 360;
+    scaffolding.resizeMode = 'preserve-ratio';
+    scaffolding.editableLists = false;
+    scaffolding.usePackagedRuntime = false;
+    scaffolding.setup();
+    scaffolding.appendTo(playerEl);
+
+    fetch(SB3_URL)
+      .then(r => {
+        if (!r.ok) throw new Error('Не удалось загрузить игру');
+        return r.arrayBuffer();
+      })
+      .then(buf => scaffolding.loadProject(buf))
+      .then(() => {
+        loader.style.display = 'none';
+        scaffolding.start();
+      })
+      .catch(err => {
+        loader.innerHTML = '<p>Не удалось загрузить игру. Попробуй обновить страницу.</p>';
+        console.error(err);
+      });
+
+    document.getElementById('green-flag').addEventListener('click', () => {
+      scaffolding.greenFlag();
+    });
+    document.getElementById('stop-all').addEventListener('click', () => {
+      scaffolding.stopAll();
+    });
+    document.getElementById('fullscreen').addEventListener('click', () => {
+      if (playerEl.requestFullscreen) playerEl.requestFullscreen();
+    });
+
+    const copyBtn = document.getElementById('copy-link');
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(copyBtn.dataset.url);
+        const original = copyBtn.textContent;
+        copyBtn.textContent = 'Скопировано ✓';
+        setTimeout(() => { copyBtn.textContent = original; }, 1500);
+      } catch (e) {
+        prompt('Скопируй ссылку:', copyBtn.dataset.url);
+      }
+    });
+  })();
+</script>
+{% endblock %}

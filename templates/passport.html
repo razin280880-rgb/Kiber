@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Паспорт {{ session.child_name }} · {{ session.passport_serial }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='passport.css') }}">
+</head>
+<body class="passport-body">
+
+  <div class="passport-toolbar no-print">
+    <a class="link-muted" href="{{ url_for('admin_session_view', token=session.token) }}">← Назад к сессии</a>
+    <button class="btn btn-primary" onclick="window.print()">🖨 Печать (A6)</button>
+  </div>
+
+  <main class="passport-stack">
+
+    <!-- ========== ЛИЦЕВАЯ ========== -->
+    <article class="passport-side passport-front">
+      <header class="pp-header">
+        <div class="pp-brand">KIBERONE</div>
+        <div class="pp-subtitle">DEVELOPER&nbsp;PASS</div>
+      </header>
+
+      <section class="pp-main">
+        <div class="pp-photo">
+          {% if photo_url %}
+            <img src="{{ photo_url }}" alt="Фото">
+          {% else %}
+            <div class="pp-photo-placeholder">3×4</div>
+          {% endif %}
+        </div>
+
+        <div class="pp-data">
+          <p class="pp-eyebrow">Имя</p>
+          <p class="pp-name">{{ session.child_name }}</p>
+
+          <p class="pp-eyebrow">Грейд</p>
+          <p class="pp-grade">{{ session.grade }}</p>
+
+          {% if track %}
+          <p class="pp-eyebrow">Направление</p>
+          <p class="pp-track">{{ track.label }}</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="pp-bottom">
+        <div class="pp-meta">
+          <div>
+            <p class="pp-eyebrow">ID</p>
+            <p class="pp-serial">{{ session.passport_serial }}</p>
+          </div>
+          <div>
+            <p class="pp-eyebrow">Принят</p>
+            <p class="pp-date">{{ session.passport_created_at[:10] if session.passport_created_at else session.created_at[:10] }}</p>
+          </div>
+        </div>
+        <div class="pp-qr">
+          <img src="{{ qr_url }}" alt="QR">
+        </div>
+      </section>
+
+      <footer class="pp-footer">
+        <span>KIBERone · {{ session.filial }}</span>
+      </footer>
+    </article>
+
+    <!-- ========== ОБРАТНАЯ ========== -->
+    <article class="passport-side passport-back">
+      <header class="pp-header">
+        <div class="pp-brand-small">KIBERONE · DEVELOPER PASS</div>
+        <div class="pp-back-subtitle">Карьерный путь · отметки наставника</div>
+      </header>
+
+      <ul class="pp-achievements">
+        <li class="done">
+          <span class="pp-check">✓</span>
+          <span class="pp-ach-text">Первая игра создана</span>
+          <span class="pp-ach-date">{{ session.passport_created_at[:10] if session.passport_created_at else '' }}</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">Освоен Scratch</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">Первый сайт</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">Python: основы</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">AI-проект защищён</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">Грейд повышен → Middle</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">Командный проект</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+        <li>
+          <span class="pp-check">○</span>
+          <span class="pp-ach-text">Олимпиада / хакатон</span>
+          <span class="pp-ach-date">___________</span>
+        </li>
+      </ul>
+
+      <footer class="pp-back-footer">
+        <p class="pp-eyebrow">Наставник</p>
+        <p class="pp-tutor">{{ session.tutor_name }}</p>
+        <p class="pp-back-note">Заполняется на занятиях</p>
+      </footer>
+    </article>
+
+  </main>
+
+</body>
+</html>

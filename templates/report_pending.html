@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Отчёт готовится · KIBERone{% endblock %}
+{% block content %}
+<div class="parent-page narrow">
+
+  <header class="game-header">
+    <div class="brand">KIBERone <span class="brand-sub">персональный отчёт</span></div>
+  </header>
+
+  <section class="status-card" style="margin-top: 40px;">
+    <div class="spinner" style="margin: 0 auto 16px;"></div>
+    <h1 style="font-size: 1.5rem; margin-bottom: 12px;">Отчёт готовится</h1>
+    <p class="muted">
+      Мы анализируем урок {{ session.child_name }} и пишем персональный разбор.<br>
+      Это занимает до 24 часов после завершения пробного.
+    </p>
+    <p class="muted small" style="margin-top: 16px;">
+      Загляните позже — ссылка автоматически обновится.
+    </p>
+  </section>
+
+  <p class="back-link center">
+    <a href="{{ url_for('parent_page', token=session.token) }}">← Назад к уроку</a>
+  </p>
+</div>
+
+<script>
+  // Раз в 60 сек перепроверим — если отчёт сгенерирован, страница откроется
+  setTimeout(() => location.reload(), 60000);
+</script>
+{% endblock %}

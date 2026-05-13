@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Отчёт о пробном уроке · {{ session.child_name }} · KIBERone{% endblock %}
+{% block og_title %}Отчёт KIBERone — {{ session.child_name }}{% endblock %}
+{% block og_description %}Персональный разбор пробного урока{% endblock %}
+
+{% block content %}
+<div class="report-page">
+
+  <header class="game-header">
+    <div class="brand">KIBERone <span class="brand-sub">персональный отчёт</span></div>
+  </header>
+
+  <section class="report-hero">
+    <p class="hero-eyebrow">{{ session.finished_at[:10] if session.finished_at else '' }} · {{ session.filial }}</p>
+    <h1 class="report-title">{{ report.title }}</h1>
+    <p class="report-subtitle">{{ session.child_name }} · {{ session.child_age }} лет · {{ session.grade }}</p>
+  </section>
+
+  <section class="report-intro">
+    <p>{{ report.intro }}</p>
+  </section>
+
+  <section class="report-observations">
+    <h2>Что мы увидели на уроке</h2>
+    <div class="observations-list">
+      {% for obs in report.observations %}
+        <article class="observation-card">
+          <div class="obs-emoji">{{ obs.emoji }}</div>
+          <div class="obs-body">
+            <h3>{{ obs.title }}</h3>
+            <p>{{ obs.text }}</p>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="report-takeaways">
+    <h2>Главное</h2>
+    <ul class="takeaways-list">
+      {% for t in report.takeaways %}
+        <li>{{ t }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if track %}
+  <section class="report-track">
+    <p class="track-eyebrow">Рекомендуемое направление</p>
+    <h2 class="track-name">{{ track.label }}</h2>
+    <p class="track-tagline">{{ track.tagline }}</p>
+    <p class="track-description">{{ track.description }}</p>
+  </section>
+  {% endif %}
+
+  <section class="report-cta">
+    <h2>Что дальше</h2>
+    <p>{{ report.cta }}</p>
+    <p class="muted small">Свяжется с вами наставник: <strong>{{ session.tutor_name }}</strong></p>
+  </section>
+
+  {% if session.game_slug %}
+  <section class="report-game">
+    <h3>Игра вашего ребёнка</h3>
+    <p>Ещё раз сыграть и поделиться:</p>
+    <a class="btn btn-primary btn-large" href="{{ url_for('game_page', slug=session.game_slug) }}">
+      Открыть игру →
+    </a>
+  </section>
+  {% endif %}
+
+  <section class="report-game">
+    <h3>Профиль разработчика</h3>
+    <p>На постоянной странице {{ session.child_name }} собираются все проекты и достижения. Эту ссылку можно отправлять родственникам.</p>
+    <a class="btn btn-ghost btn-large" href="{{ url_for('dev_profile', token=session.token) }}">
+      Открыть профиль →
+    </a>
+  </section>
+
+  <section class="report-actions">
+    <button class="btn btn-ghost" onclick="window.print()">Сохранить как PDF / распечатать</button>
+  </section>
+
+  <footer class="game-footer report-footer">
+    <p>© KIBERone · IT-академия для детей 6–14 лет · {{ session.filial }}</p>
+    <p class="muted small">Отчёт сгенерирован {{ session.report_generated_at[:16] | replace('T', ' ') if session.report_generated_at else '' }}</p>
+  </footer>
+</div>
+{% endblock %}

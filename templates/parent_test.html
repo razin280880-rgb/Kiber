@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Тест для {{ session.parent_name or 'родителя' }} · KIBERone{% endblock %}
+{% block content %}
+<div class="parent-page narrow">
+
+  <header class="game-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН</span></div>
+  </header>
+
+  <section class="hero">
+    <p class="hero-eyebrow">2 минуты — для вас</p>
+    <h1 class="test-title">Какое направление подойдёт {{ session.child_name }}?</h1>
+    <p class="hero-meta">5 коротких вопросов о вашем ребёнке</p>
+  </section>
+
+  <form method="POST" class="parent-test-form">
+    {% for q in questions %}
+      <fieldset class="question-card">
+        <legend>{{ loop.index }} / {{ questions|length }}</legend>
+        <h3>{{ q.question }}</h3>
+        <div class="options">
+          {% for opt in q.options %}
+            <label class="option {% if answers.get(q.id) == opt.key %}selected{% endif %}">
+              <input type="radio" name="{{ q.id }}" value="{{ opt.key }}"
+                     {% if answers.get(q.id) == opt.key %}checked{% endif %}
+                     required>
+              <span>{{ opt.label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary btn-large">Получить результат</button>
+  </form>
+
+  <p class="muted center back-link">
+    <a href="{{ url_for('parent_page', token=session.token) }}">← Назад к уроку</a>
+  </p>
+</div>
+
+<script>
+  // Подсветка выбранного варианта без перезагрузки
+  document.querySelectorAll('.parent-test-form fieldset').forEach(fs => {
+    fs.addEventListener('change', () => {
+      fs.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      const checked = fs.querySelector('input:checked');
+      if (checked) checked.closest('.option').classList.add('selected');
+    });
+  });
+</script>
+{% endblock %}

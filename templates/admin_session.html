@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}{{ session.child_name }} — урок · KIBERone ИгроВАН{% endblock %}
+{% block content %}
+<div class="admin-page">
+
+  <header class="admin-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН · урок идёт</span></div>
+    <a class="link-muted" href="{{ url_for('admin_home') }}">← На главную</a>
+  </header>
+
+  <section class="admin-card session-head">
+    <div class="session-head-left">
+      <p class="muted">Сессия пробного</p>
+      <h1>{{ session.child_name }}</h1>
+      <p class="muted">{{ session.child_age }} лет · {{ session.grade }} · {{ session.filial }}</p>
+      <p class="muted">Наставник: {{ session.tutor_name }} · Родитель: {{ session.parent_name }}</p>
+    </div>
+    <div class="session-head-right">
+      <div class="qr-wrapper">
+        <img src="{{ qr_url }}" alt="QR для родителя">
+        <p class="muted">Дай отсканировать родителю</p>
+        <p class="muted small"><code>{{ parent_url }}</code></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="admin-card">
+    <h2>Чекпойнты урока</h2>
+    <p class="muted">Тыкай по мере выполнения — родитель видит изменения сразу.</p>
+
+    <div class="checkpoints-grid">
+      {% for cp in checkpoints %}
+        <form method="POST"
+              action="{{ url_for('admin_session_checkpoint', token=session.token, cp_id=cp.id) }}"
+              class="checkpoint-card {% if cp.id in done_ids %}done{% endif %}"
+              {% if session.is_finished %}data-locked="1"{% endif %}>
+          <div class="cp-emoji">{{ cp.emoji }}</div>
+          <div class="cp-body">
+            <p class="cp-title">{{ cp.title_admin }}</p>
+            {% if cp.id in done_ids %}
+              <p class="cp-status">✓ Отмечено</p>
+            {% else %}
+              <p class="cp-status muted">Ещё не отмечено</p>
+            {% endif %}
+          </div>
+          {% if not session.is_finished %}
+            {% if cp.id in done_ids %}
+              <input type="hidden" name="action" value="remove">
+              <button class="btn btn-ghost btn-sm">Убрать</button>
+            {% else %}
+              <button class="btn btn-primary btn-sm">Отметить</button>
+            {% endif %}
+          {% endif %}
+        </form>
+      {% endfor %}
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: {{ (done_ids|length / total * 100) | round(0) }}%"></div>
+    </div>
+    <p class="muted center">{{ done_ids|length }} из {{ total }}</p>
+  </section>
+
+  {% if not session.is_finished %}
+  <section class="admin-card">
+    <h2>📹 Видео-нарезка</h2>
+    {% if session.video_filename %}
+      <p class="muted">Загружено: <code>{{ session.video_filename }}</code>. Через 1 час после завершения урока worker отправит её родителю.</p>
+    {% else %}
+      <p class="muted">Сними короткое видео (30-60 сек) с урока — момент запуска игры, лицо ребёнка, аплодисменты. Загрузи здесь — родитель получит его через час.</p>
+    {% endif %}
+    <form method="POST"
+          enctype="multipart/form-data"
+          action="{{ url_for('admin_session_upload_video', token=session.token) }}"
+          class="admin-form">
+      <label>
+        <span>Файл (.mp4, .mov, .webm)</span>
+        <input type="file" name="video" accept="video/mp4,video/quicktime,video/webm" required>
+      </label>
+      <button class="btn btn-ghost">Загрузить видео</button>
+    </form>
+  </section>
+  {% endif %}
+
+  <section class="admin-card">
+    {% if session.is_finished %}
+      <h2>✓ Урок завершён</h2>
+      <p class="muted">{{ session.finished_at[:16] | replace('T', ' ') }}</p>
+      {% if session.game_slug %}
+        <p>Игра загружена:
+          <a href="{{ url_for('admin_game_share', slug=session.game_slug) }}">открыть страницу шеринга →</a>
+        </p>
+      {% else %}
+        <a href="{{ url_for('admin_game_upload', session=session.token) }}"
+           class="btn btn-primary btn-large">
+          📦 Загрузить готовую игру ребёнка (.sb3)
+        </a>
+      {% endif %}
+    {% else %}
+      <h2>Финал урока</h2>
+      <p class="muted">Когда дети защитили игры — нажми «Завершить». После этого можно будет загрузить .sb3 ребёнка для мини-лендинга.</p>
+      <form method="POST" action="{{ url_for('admin_session_finish', token=session.token) }}">
+        <button class="btn btn-primary btn-large">🏁 Завершить урок</button>
+      </form>
+    {% endif %}
+  </section>
+
+  {% if session.parent_test %}
+  <section class="admin-card">
+    <h2>Тест родителя пройден</h2>
+    <p>Результат: <strong>{{ session.parent_test.result_label }}</strong></p>
+    <p class="muted">Время: {{ session.parent_test.submitted_at[:16] | replace('T', ' ') }}</p>
+  </section>
+  {% endif %}
+
+  {% if session.is_finished %}
+  <section class="admin-card">
+    {% if session.passport_serial %}
+      <h2>🎫 Паспорт разработчика</h2>
+      <p>Серийник: <code>{{ session.passport_serial }}</code></p>
+      <p class="muted">Грейд: <strong>{{ session.grade }}</strong> · выдан {{ session.passport_created_at[:10] if session.passport_created_at else '' }}</p>
+
+      <div class="form-row">
+        <a class="btn btn-primary" href="{{ url_for('admin_passport_view', token=session.token) }}" target="_blank">
+          Открыть и распечатать (A6)
+        </a>
+      </div>
+
+      <form method="POST"
+            enctype="multipart/form-data"
+            action="{{ url_for('admin_passport_photo', token=session.token) }}"
+            class="admin-form" style="margin-top: 16px;">
+        <label>
+          <span>Фото ребёнка для паспорта <small>(JPG/PNG, опционально)</small></span>
+          <input type="file" name="photo" accept="image/jpeg,image/png,image/webp">
+        </label>
+        <button class="btn btn-ghost">
+          {{ 'Заменить фото' if session.passport_photo else 'Загрузить фото' }}
+        </button>
+      </form>
+    {% else %}
+      <h2>🎫 Паспорт разработчика</h2>
+      <p class="muted">Выдай ребёнку именной паспорт с серийником и грейдом ({{ session.grade }}). Печатается на принтере A6 и ламинируется.</p>
+      <form method="POST" action="{{ url_for('admin_passport_issue', token=session.token) }}">
+        <button class="btn btn-primary">Выдать паспорт</button>
+      </form>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if session.is_finished %}
+  <section class="admin-card">
+    {% if session.report_data %}
+      <h2>📄 Отчёт сгенерирован</h2>
+      <p><strong>{{ session.report_data.title }}</strong></p>
+      <p class="muted">{{ session.report_generated_at[:16] | replace('T', ' ') }}</p>
+      {% if session.report_sent_at %}
+        <p class="muted">Отправлен родителю: {{ session.report_sent_at[:16] | replace('T', ' ') }}</p>
+      {% else %}
+        <p class="muted">Будет отправлен родителю через 24 ч после завершения урока (или нажми «Сгенерировать ещё раз» если хочешь обновить).</p>
+      {% endif %}
+      <div class="form-row">
+        <a class="btn btn-primary" href="{{ url_for('parent_report', token=session.token) }}" target="_blank">
+          Открыть отчёт →
+        </a>
+        <form method="POST" action="{{ url_for('admin_session_generate_report', token=session.token) }}" style="display:inline;">
+          <button class="btn btn-ghost">Сгенерировать заново</button>
+        </form>
+      </div>
+    {% else %}
+      <h2>📄 Персональный отчёт</h2>
+      <p class="muted">Worker автоматически сгенерирует отчёт через 24 часа после завершения урока. Если хочешь — запусти прямо сейчас (например, для срочного клиента).</p>
+      <form method="POST" action="{{ url_for('admin_session_generate_report', token=session.token) }}">
+        <button class="btn btn-primary">Сгенерировать отчёт сейчас</button>
+      </form>
+    {% endif %}
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

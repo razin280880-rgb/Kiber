@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}{{ session.child_name }} · {{ session.grade }} · KIBERone Developer{% endblock %}
+{% block og_title %}{{ session.child_name }} — Junior {{ session.grade }} в KIBERone{% endblock %}
+{% block og_description %}Портфолио юного разработчика: грейд, проекты, достижения{% endblock %}
+
+{% block content %}
+<div class="dev-profile">
+
+  <header class="dev-topbar">
+    <div class="brand">KIBERone <span class="brand-sub">developer&nbsp;profile</span></div>
+    <span class="dev-serial">{{ session.passport_serial or '—' }}</span>
+  </header>
+
+  <section class="dev-hero">
+    <div class="dev-grade-badge">{{ session.grade }}</div>
+    <h1 class="dev-name">{{ session.child_name }}</h1>
+    <p class="dev-meta">
+      {{ session.child_age }} лет
+      {% if track %} · {{ track.label }}{% endif %}
+      · {{ session.filial }}
+    </p>
+    <p class="dev-since">
+      В KIBERone с {{ session.created_at[:10] }}
+    </p>
+  </section>
+
+  <section class="dev-stats">
+    <div class="stat">
+      <span class="stat-num">1</span>
+      <span class="stat-label">проект</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">1</span>
+      <span class="stat-label">из 8 ачивок</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">{{ session.grade }}</span>
+      <span class="stat-label">грейд</span>
+    </div>
+  </section>
+
+  {% if game %}
+  <section class="dev-projects">
+    <h2>Проекты</h2>
+    <article class="project-card">
+      <div class="project-thumb">🎮</div>
+      <div class="project-body">
+        <h3>Первая игра</h3>
+        <p class="muted">Создана {{ game.created_at[:10] }} · Scratch</p>
+        <a class="btn btn-primary" href="{{ url_for('game_page', slug=game.slug) }}">
+          Открыть и сыграть →
+        </a>
+      </div>
+    </article>
+  </section>
+  {% endif %}
+
+  <section class="dev-achievements">
+    <h2>Достижения</h2>
+    <ul class="dev-ach-list">
+      <li class="done">
+        <span class="ach-icon">🏆</span>
+        <div class="ach-body">
+          <p class="ach-title">Первая игра создана</p>
+          <p class="ach-date">{{ session.created_at[:10] }}</p>
+        </div>
+      </li>
+      <li>
+        <span class="ach-icon">○</span>
+        <div class="ach-body">
+          <p class="ach-title">Освоен Scratch</p>
+          <p class="ach-date muted">скоро</p>
+        </div>
+      </li>
+      <li>
+        <span class="ach-icon">○</span>
+        <div class="ach-body">
+          <p class="ach-title">Первый сайт</p>
+          <p class="ach-date muted">скоро</p>
+        </div>
+      </li>
+      <li>
+        <span class="ach-icon">○</span>
+        <div class="ach-body">
+          <p class="ach-title">Python: основы</p>
+          <p class="ach-date muted">скоро</p>
+        </div>
+      </li>
+      <li>
+        <span class="ach-icon">○</span>
+        <div class="ach-body">
+          <p class="ach-title">AI-проект защищён</p>
+          <p class="ach-date muted">скоро</p>
+        </div>
+      </li>
+      <li>
+        <span class="ach-icon">○</span>
+        <div class="ach-body">
+          <p class="ach-title">Грейд повышен</p>
+          <p class="ach-date muted">скоро</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  {% if track %}
+  <section class="dev-track-card">
+    <p class="track-eyebrow">Рекомендуемое направление</p>
+    <h2 class="track-name">{{ track.label }}</h2>
+    <p class="track-tagline">{{ track.tagline }}</p>
+  </section>
+  {% endif %}
+
+  <section class="dev-share">
+    <h3>Поделись профилем</h3>
+    <p class="muted">Покажи родственникам и друзьям, чему ты учишься</p>
+    <div class="share-buttons">
+      <a class="btn btn-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-telegram" href="{{ telegram_url }}" target="_blank" rel="noopener">Telegram</a>
+      <button class="btn btn-ghost" id="copy-profile" data-url="{{ profile_url }}">
+        Скопировать ссылку
+      </button>
+    </div>
+  </section>
+
+  <section class="dev-cta">
+    <h3>А твой ребёнок?</h3>
+    <p>Запиши его на пробный — он создаст свою первую игру за один урок и получит такой же профиль разработчика.</p>
+    <a class="btn btn-primary btn-large" href="https://kiberone.ru">Записаться на пробный</a>
+  </section>
+
+  <footer class="game-footer">
+    <p>© KIBERone · IT-академия для детей 6–14 лет</p>
+  </footer>
+</div>
+
+<script>
+  document.getElementById('copy-profile').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    try {
+      await navigator.clipboard.writeText(btn.dataset.url);
+      const original = btn.textContent;
+      btn.textContent = 'Скопировано ✓';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    } catch (err) {
+      prompt('Скопируй ссылку:', btn.dataset.url);
+    }
+  });
+</script>
+{% endblock %}

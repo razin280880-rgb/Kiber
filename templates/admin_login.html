@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Вход — KIBERone ИгроВАН{% endblock %}
+{% block content %}
+<div class="admin-login">
+  <h1>KIBERone · ИгроВАН</h1>
+  <p>Вход для наставников</p>
+  <form method="POST">
+    <input type="password" name="password" placeholder="Пароль" autofocus required>
+    <button type="submit" class="btn btn-primary btn-large">Войти</button>
+  </form>
+</div>
+{% endblock %}

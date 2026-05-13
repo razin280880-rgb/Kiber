@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Админка — KIBERone ИгроВАН{% endblock %}
+{% block content %}
+<div class="admin-page">
+
+  <header class="admin-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН · админка</span></div>
+    <a class="link-muted" href="{{ url_for('admin_logout') }}">Выйти</a>
+  </header>
+
+  <section class="admin-card hero-card">
+    <h1>Что делаем?</h1>
+    <p class="muted">Выбери действие — обычно сессия идёт по такому порядку:</p>
+
+    <div class="action-grid">
+      <a class="action-tile primary" href="{{ url_for('admin_session_new') }}">
+        <div class="action-emoji">🚀</div>
+        <div class="action-title">Начать пробный урок</div>
+        <div class="action-sub">Создать сессию, дать родителю QR, отмечать чекпойнты</div>
+      </a>
+
+      <a class="action-tile" href="{{ url_for('admin_game_upload') }}">
+        <div class="action-emoji">📦</div>
+        <div class="action-title">Загрузить игру</div>
+        <div class="action-sub">Готовая .sb3 от ребёнка — получить ссылку и QR для шеринга</div>
+      </a>
+    </div>
+  </section>
+
+  {% if sessions %}
+  <section class="admin-card">
+    <h2>Сессии</h2>
+    <ul class="recent-list">
+      {% for s in sessions %}
+        <li>
+          <a href="{{ url_for('admin_session_view', token=s.token) }}">
+            <div class="recent-row">
+              <strong>{{ s.child_name }}</strong>
+              <span class="muted">{{ s.child_age }} лет · {{ s.grade }}</span>
+              {% if s.is_finished %}
+                <span class="badge badge-done">завершён</span>
+              {% else %}
+                <span class="badge badge-live">идёт</span>
+              {% endif %}
+            </div>
+            <span class="muted">{{ s.tutor_name }} · {{ s.created_at[:16] | replace('T', ' ') }} · {{ s.checkpoints|length }}/{{ checkpoints_total if checkpoints_total else 7 }} чекпойнтов</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if games %}
+  <section class="admin-card">
+    <h2>Загруженные игры</h2>
+    <ul class="recent-list">
+      {% for g in games %}
+        <li>
+          <a href="{{ url_for('admin_game_share', slug=g.slug) }}">
+            <strong>{{ g.child_name }}</strong>
+            <span class="muted">{{ g.child_age }} лет · {{ g.tutor_name }} · {{ g.created_at[:10] }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

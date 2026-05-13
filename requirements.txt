@@ -1,0 +1,7 @@
+Flask==3.0.3
+qrcode[pil]==7.4.2
+python-slugify==8.0.4
+python-dotenv==1.0.1
+waitress==3.0.0
+requests>=2.32
+anthropic>=0.40.0

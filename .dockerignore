@@ -1,0 +1,30 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.local
+.idea
+.vscode
+
+# Локальные данные не нужны в образе — они монтируются томами на сервере
+games/*.sb3
+games/*.json
+sessions/*.json
+videos/*.mp4
+videos/*.mov
+videos/*.webm
+photos/*
+passports/counter.json
+
+# Документация и deploy-скрипты в образе не нужны
+README.md
+DEPLOY.md
+SETUP.md
+docs/
+deploy/
+start.bat
+worker.bat

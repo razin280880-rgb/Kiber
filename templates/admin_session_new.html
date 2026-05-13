@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Новая сессия — KIBERone ИгроВАН{% endblock %}
+{% block content %}
+<div class="admin-page">
+
+  <header class="admin-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН · админка</span></div>
+    <a class="link-muted" href="{{ url_for('admin_home') }}">← На главную</a>
+  </header>
+
+  <section class="admin-card">
+    <h1>🚀 Начать пробный урок</h1>
+    <p class="muted">Заполни 30 секунд — получишь экран с QR для родителя и панель управления уроком.</p>
+
+    {% if crm_enabled %}
+    <div class="crm-lookup">
+      <p class="muted small">⚡ Введи телефон родителя — подтянем данные из CRM:</p>
+      <div class="copy-row">
+        <input type="tel" id="crm-phone" placeholder="+7 999 123-45-67">
+        <button type="button" class="btn btn-ghost" id="crm-lookup-btn">Найти в CRM</button>
+      </div>
+      <p class="muted small" id="crm-lookup-status" style="margin-top:8px;"></p>
+    </div>
+    {% endif %}
+
+    <form method="POST" class="admin-form" id="session-form">
+      <label>
+        <span>Имя ребёнка</span>
+        <input type="text" name="child_name" required autofocus
+               value="{{ form.child_name or '' }}"
+               placeholder="Михаил">
+      </label>
+
+      <label>
+        <span>Возраст</span>
+        <input type="number" name="child_age" min="4" max="18" required
+               value="{{ form.child_age or '' }}"
+               placeholder="8">
+      </label>
+
+      <label>
+        <span>Имя родителя <small>(как обращаться в сообщениях)</small></span>
+        <input type="text" name="parent_name" required
+               value="{{ form.parent_name or '' }}"
+               placeholder="Ольга">
+      </label>
+
+      <label>
+        <span>Телефон родителя <small>(для отправки видео и отчёта через WhatsApp)</small></span>
+        <input type="tel" name="parent_phone"
+               value="{{ form.parent_phone or '' }}"
+               placeholder="+7 999 123-45-67">
+      </label>
+
+      <label>
+        <span>Имя наставника</span>
+        <input type="text" name="tutor_name" required
+               value="{{ form.tutor_name or '' }}"
+               placeholder="Анна Иванова">
+      </label>
+
+      <label>
+        <span>Филиал</span>
+        <input type="text" name="filial"
+               value="{{ form.filial or default_filial }}">
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-large">
+        Начать урок →
+      </button>
+    </form>
+  </section>
+
+</div>
+
+{% if crm_enabled %}
+<script>
+(function () {
+  const btn = document.getElementById('crm-lookup-btn');
+  const phoneEl = document.getElementById('crm-phone');
+  const statusEl = document.getElementById('crm-lookup-status');
+  const filialEl = document.querySelector('input[name="filial"]');
+
+  async function lookup() {
+    const phone = phoneEl.value.trim();
+    if (!phone) {
+      statusEl.textContent = 'Введите телефон';
+      return;
+    }
+    statusEl.textContent = 'Ищем в CRM…';
+    btn.disabled = true;
+    try {
+      const params = new URLSearchParams({
+        phone,
+        filial: filialEl ? filialEl.value : '',
+      });
+      const res = await fetch('/admin/sessions/lookup?' + params.toString(), {
+        cache: 'no-store',
+      });
+      const data = await res.json();
+      if (!data.found) {
+        const reason = data.reason || 'unknown';
+        const msg = {
+          empty_phone: 'Введите телефон',
+          crm_not_configured: 'CRM не настроена в .env',
+          not_found: 'Не найден в CRM — заполни форму вручную',
+        }[reason] || `Не найден (${reason})`;
+        statusEl.textContent = msg;
+        return;
+      }
+      // Заполняем форму
+      if (data.parent_name) document.querySelector('[name="parent_name"]').value = data.parent_name;
+      if (data.parent_phone) document.querySelector('[name="parent_phone"]').value = data.parent_phone;
+      if (data.child_name) document.querySelector('[name="child_name"]').value = data.child_name;
+      if (data.child_age) document.querySelector('[name="child_age"]').value = data.child_age;
+      statusEl.textContent = '✓ Данные из CRM подставлены — проверь и начни урок';
+      statusEl.style.color = 'var(--kiber-success)';
+    } catch (e) {
+      statusEl.textContent = 'Ошибка запроса: ' + e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener('click', lookup);
+  phoneEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      lookup();
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

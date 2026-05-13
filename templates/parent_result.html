@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Результат · {{ session.child_name }} · KIBERone{% endblock %}
+{% block content %}
+<div class="parent-page narrow">
+
+  <header class="game-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН</span></div>
+  </header>
+
+  <section class="result-card">
+    <p class="hero-eyebrow">Рекомендуем для {{ session.child_name }}</p>
+    <h1 class="result-title">{{ track.label }}</h1>
+    <p class="result-tagline">{{ track.tagline }}</p>
+    <p class="result-description">{{ track.description }}</p>
+
+    <a class="btn btn-primary btn-large" href="{{ url_for('parent_page', token=session.token) }}">
+      ← Вернуться к уроку
+    </a>
+  </section>
+
+  <section class="result-note">
+    <p class="muted">
+      Этот результат — экспресс-ориентир. После урока ваш наставник
+      ({{ session.tutor_name }}) свяжется и предложит подходящий курс,
+      учитывая что увидел сегодня.
+    </p>
+  </section>
+
+  <footer class="game-footer">
+    <p>© KIBERone · IT-академия для детей 6–14 лет</p>
+  </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Загрузка игры — KIBERone ИгроВАН{% endblock %}
+{% block content %}
+<div class="admin-page">
+
+  <header class="admin-header">
+    <div class="brand">KIBERone <span class="brand-sub">ИгроВАН · загрузка игры</span></div>
+    <a class="link-muted" href="{{ url_for('admin_home') }}">← На главную</a>
+  </header>
+
+  <section class="admin-card">
+    <h1>📦 Загрузить игру ребёнка</h1>
+    {% if prefilled %}
+      <p class="muted">Из сессии: <strong>{{ prefilled.child_name }}</strong> ({{ prefilled.child_age }} лет)</p>
+    {% else %}
+      <p class="muted">Заполни форму и прикрепи .sb3 — получишь ссылку и QR для шеринга родителю.</p>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="admin-form">
+      {% if session_token %}
+        <input type="hidden" name="session_token" value="{{ session_token }}">
+      {% endif %}
+
+      <label>
+        <span>Имя ребёнка</span>
+        <input type="text" name="child_name" required
+               value="{{ form.child_name or (prefilled.child_name if prefilled else '') }}"
+               placeholder="Михаил">
+      </label>
+
+      <label>
+        <span>Возраст</span>
+        <input type="number" name="child_age" min="4" max="18" required
+               value="{{ form.child_age or (prefilled.child_age if prefilled else '') }}"
+               placeholder="8">
+      </label>
+
+      <label>
+        <span>Имя наставника</span>
+        <input type="text" name="tutor_name" required
+               value="{{ form.tutor_name or (prefilled.tutor_name if prefilled else '') }}"
+               placeholder="Анна Иванова">
+      </label>
+
+      <label>
+        <span>Филиал</span>
+        <input type="text" name="filial"
+               value="{{ form.filial or (prefilled.filial if prefilled else default_filial) }}">
+      </label>
+
+      <label>
+        <span>Телефон родителя <small>(необязательно)</small></span>
+        <input type="tel" name="parent_phone"
+               value="{{ form.parent_phone or (prefilled.parent_phone if prefilled else '') }}"
+               placeholder="+7 999 123-45-67">
+      </label>
+
+      <label>
+        <span>Файл игры (.sb3 из Scratch)</span>
+        <input type="file" name="sb3" accept=".sb3" required>
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-large">
+        Создать страницу игры
+      </button>
+    </form>
+  </section>
+
+</div>
+{% endblock %}

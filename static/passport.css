@@ -1,0 +1,330 @@
+/* Паспорт разработчика KIBERone — A6 (105 × 148 мм), две стороны.
+   Дизайн рассчитан на печать на плотной бумаге и ламинирование. */
+
+@page {
+  size: A6 portrait;
+  margin: 0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.passport-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+  background: #2c2253;
+  color: #1a1438;
+}
+
+.passport-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 720px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+.passport-toolbar .link-muted {
+  color: #d4ccff;
+  text-decoration: none;
+}
+
+.passport-toolbar .btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.passport-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+}
+
+/* Базовая страница --------------------------------------------- */
+
+.passport-side {
+  width: 105mm;
+  height: 148mm;
+  padding: 6mm 6mm 5mm;
+  background: white;
+  color: #1a1438;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+  display: flex;
+  flex-direction: column;
+}
+
+.passport-side:last-child {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+/* Лицевая ------------------------------------------------------ */
+
+.passport-front {
+  background:
+    linear-gradient(135deg, #faf6ff 0%, #ffffff 100%);
+}
+
+.passport-front::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4mm;
+  background: linear-gradient(90deg, #7c3aed, #fbbf24, #7c3aed);
+}
+
+.pp-header {
+  text-align: center;
+  margin-top: 4mm;
+  padding-bottom: 3mm;
+  border-bottom: 0.3mm solid #ddd;
+}
+
+.pp-brand {
+  font-size: 14pt;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #7c3aed, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pp-subtitle {
+  font-size: 7pt;
+  letter-spacing: 0.3em;
+  color: #6b6489;
+  margin-top: 1mm;
+}
+
+.pp-main {
+  display: grid;
+  grid-template-columns: 30mm 1fr;
+  gap: 4mm;
+  margin-top: 5mm;
+  flex-grow: 1;
+}
+
+.pp-photo {
+  width: 30mm;
+  height: 40mm;
+  background: #f0ebff;
+  border: 0.4mm solid #c4b5fd;
+  border-radius: 2mm;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pp-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.pp-photo-placeholder {
+  color: #a59ec9;
+  font-size: 12pt;
+  font-weight: 600;
+}
+
+.pp-data {
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+}
+
+.pp-eyebrow {
+  font-size: 5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6b6489;
+  font-weight: 700;
+}
+
+.pp-name {
+  font-size: 13pt;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #1a1438;
+}
+
+.pp-grade {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.pp-track {
+  font-size: 8pt;
+  font-weight: 600;
+  color: #1a1438;
+}
+
+.pp-bottom {
+  display: grid;
+  grid-template-columns: 1fr 18mm;
+  gap: 4mm;
+  align-items: end;
+  margin-top: 3mm;
+  padding-top: 3mm;
+  border-top: 0.3mm dashed #ccc;
+}
+
+.pp-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+}
+
+.pp-serial {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.pp-date {
+  font-size: 8pt;
+  font-weight: 600;
+}
+
+.pp-qr {
+  width: 18mm;
+  height: 18mm;
+}
+
+.pp-qr img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pp-footer {
+  text-align: center;
+  font-size: 6pt;
+  color: #6b6489;
+  margin-top: 2mm;
+  letter-spacing: 0.08em;
+}
+
+/* Обратная ----------------------------------------------------- */
+
+.passport-back {
+  background: #fefdfb;
+}
+
+.passport-back::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4mm;
+  background: linear-gradient(90deg, #fbbf24, #7c3aed, #fbbf24);
+}
+
+.pp-brand-small {
+  font-size: 8pt;
+  letter-spacing: 0.2em;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7c3aed, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+}
+
+.pp-back-subtitle {
+  font-size: 6pt;
+  color: #6b6489;
+  text-align: center;
+  margin-top: 1mm;
+  letter-spacing: 0.1em;
+}
+
+.pp-achievements {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+  margin-top: 4mm;
+  flex-grow: 1;
+}
+
+.pp-achievements li {
+  display: grid;
+  grid-template-columns: 5mm 1fr auto;
+  gap: 2mm;
+  align-items: center;
+  padding: 1.5mm 2mm;
+  border-bottom: 0.2mm dotted #ccc;
+  font-size: 8pt;
+}
+
+.pp-check {
+  font-size: 9pt;
+  font-weight: 800;
+  color: #c4b5fd;
+}
+
+.pp-achievements li.done {
+  background: linear-gradient(90deg, rgba(124,58,237,0.08), transparent);
+}
+
+.pp-achievements li.done .pp-check {
+  color: #10b981;
+}
+
+.pp-achievements li.done .pp-ach-text {
+  font-weight: 700;
+}
+
+.pp-ach-text {
+  font-size: 8pt;
+}
+
+.pp-ach-date {
+  font-size: 6pt;
+  color: #6b6489;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.pp-back-footer {
+  margin-top: 2mm;
+  padding-top: 2mm;
+  border-top: 0.3mm solid #ccc;
+  text-align: center;
+}
+
+.pp-tutor {
+  font-size: 9pt;
+  font-weight: 700;
+}
+
+.pp-back-note {
+  font-size: 6pt;
+  color: #6b6489;
+  margin-top: 1mm;
+  font-style: italic;
+}
+
+/* Печать — скрыть тулбар --------------------------------------- */
+
+@media print {
+  body.passport-body {
+    background: white;
+  }
+  .no-print { display: none !important; }
+  .passport-stack { gap: 0; padding: 0; }
+  .passport-side {
+    box-shadow: none;
+    margin: 0;
+  }
+}

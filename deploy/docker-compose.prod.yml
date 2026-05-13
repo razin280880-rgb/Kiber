@@ -1,0 +1,53 @@
+# Production docker-compose для trial.kiberone.ru
+#
+# Запуск:
+#     cd /opt/igrovan-trial
+#     docker compose -f deploy/docker-compose.prod.yml up -d
+#
+# Web слушает на 127.0.0.1:8000 — nginx на хосте проксирует с 443.
+# Worker крутится отдельным контейнером, делит те же тома данных.
+#
+# Тома (volumes) важны: при пересоздании контейнера данные не теряются.
+# Если переносишь сервер — забирай эти папки целиком.
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: igrovan-trial:latest
+    container_name: igrovan-web
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      # Только локально — наружу выпускает nginx на хосте
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ../games:/app/games
+      - ../sessions:/app/sessions
+      - ../videos:/app/videos
+      - ../photos:/app/photos
+      - ../passports:/app/passports
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/admin/login').read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  worker:
+    image: igrovan-trial:latest
+    container_name: igrovan-worker
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    command: ["python", "-m", "src.worker"]
+    depends_on:
+      - web
+    volumes:
+      - ../games:/app/games
+      - ../sessions:/app/sessions
+      - ../videos:/app/videos
+      - ../photos:/app/photos
+      - ../passports:/app/passports

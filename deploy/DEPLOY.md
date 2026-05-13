@@ -1,9 +1,14 @@
-# Деплой ИгроВАН на trial.kiberone.ru
+# Деплой ИгроВАН на школа-программирования.рф
+
+> **Технический домен (punycode):** `xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai`
+> Везде в командах ниже используется punycode-форма — это правильно. В браузере домен отобразится как кириллица автоматически.
+
+# Деплой ИгроВАН на xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai
 
 Инструкция для самостоятельного развёртывания на Linux VPS (Ubuntu 22.04+ / Debian 12). Время: 30-60 минут.
 
 **Что в итоге будет работать:**
-- `https://trial.kiberone.ru` — сайт с SSL
+- `https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai` — сайт с SSL
 - Веб-приложение (Flask + waitress в Docker-контейнере)
 - Worker (отдельный контейнер, отправляет родителям видео через 1ч и отчёты через 24ч)
 - Wazzup24 интеграция для WhatsApp
@@ -16,7 +21,7 @@
 
 ---
 
-## Шаг 1. DNS — направить trial.kiberone.ru на сервер
+## Шаг 1. DNS — направить xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai на сервер
 
 В панели регистратора домена kiberone.ru (reg.ru / nic.ru / etc.):
 
@@ -30,7 +35,7 @@
 
 Проверка с локального компьютера:
 ```bash
-ping trial.kiberone.ru
+ping xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai
 ```
 Должен пинговаться твой IP. DNS обновляется за 5-30 минут.
 
@@ -133,7 +138,7 @@ nano .env
 ```
 
 Заполни обязательно:
-- `BASE_URL=https://trial.kiberone.ru`
+- `BASE_URL=https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai`
 - `ADMIN_PASSWORD=<сгенерированный_пароль>`
 - `SECRET_KEY=<сгенерированный_ключ>`
 - `WAZZUP_API_KEY=<из_личного_кабинета_wazzup24>`
@@ -172,26 +177,26 @@ docker compose -f deploy/docker-compose.prod.yml logs --tail=50 worker
 
 ---
 
-## Шаг 8. Настроить nginx для trial.kiberone.ru
+## Шаг 8. Настроить nginx для xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai
 
 Скопируй конфиг:
 ```bash
-sudo cp /opt/igrovan-trial/deploy/nginx-trial-kiberone.conf /etc/nginx/sites-available/trial.kiberone.ru
-sudo ln -s /etc/nginx/sites-available/trial.kiberone.ru /etc/nginx/sites-enabled/
+sudo cp /opt/igrovan-trial/deploy/nginx-trial-kiberone.conf /etc/nginx/sites-available/xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai
+sudo ln -s /etc/nginx/sites-available/xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai /etc/nginx/sites-enabled/
 sudo nginx -t        # проверка синтаксиса — должно быть "syntax is ok"
 sudo systemctl reload nginx
 ```
 
-Открой `http://trial.kiberone.ru` в браузере — должна быть страница `/admin/login`.
+Открой `http://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai` в браузере — должна быть страница `/admin/login`.
 
-Если нет — DNS ещё не прогрелся (`ping trial.kiberone.ru` покажет IP).
+Если нет — DNS ещё не прогрелся (`ping xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai` покажет IP).
 
 ---
 
 ## Шаг 9. SSL через Let's Encrypt
 
 ```bash
-sudo certbot --nginx -d trial.kiberone.ru
+sudo certbot --nginx -d xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai
 ```
 
 Certbot:
@@ -202,11 +207,11 @@ Certbot:
 
 Проверь:
 ```bash
-curl -I https://trial.kiberone.ru/admin/login
+curl -I https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai/admin/login
 # HTTP/2 200
 ```
 
-Открой в браузере `https://trial.kiberone.ru/admin` — должна быть страница входа.
+Открой в браузере `https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai/admin` — должна быть страница входа.
 
 Сертификат автообновляется (certbot ставит cron job). Проверить:
 ```bash
@@ -217,7 +222,7 @@ sudo certbot renew --dry-run
 
 ## Шаг 10. Финальная проверка
 
-1. `https://trial.kiberone.ru/admin/login` — войти с твоим `ADMIN_PASSWORD`
+1. `https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai/admin/login` — войти с твоим `ADMIN_PASSWORD`
 2. «🚀 Начать пробный урок» — создать тестовую сессию
 3. Открыть `/parent/<token>` с телефона — проверить что polling работает
 4. Загрузить тестовый `.sb3`, выдать паспорт — проверить весь flow
@@ -288,7 +293,7 @@ sudo crontab -e
 | Проблема | Что проверить |
 |---|---|
 | 502 Bad Gateway | Контейнеры лежат: `docker compose ... ps`. Перезапусти `up -d` |
-| QR не открывает страницу с телефона | DNS / SSL не работают. `curl -I https://trial.kiberone.ru/` с сервера |
+| QR не открывает страницу с телефона | DNS / SSL не работают. `curl -I https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai/` с сервера |
 | Wazzup не отправляет | Проверь `.env` ключи + логи worker (`logs -f worker`) |
 | Отчёт не генерится | `ANTHROPIC_API_KEY` пуст или невалиден. В fallback отчёт всё равно сгенерится |
 | Кончилось место | `df -h`. Видео и фото растут — настрой ротацию или вынеси в S3 |
@@ -297,4 +302,4 @@ sudo crontab -e
 
 ## Готово
 
-После Шага 10 у тебя живой `https://trial.kiberone.ru`. Можно отдавать наставникам в Челнах. На пробных уроках они логинятся в `/admin`, создают сессии, родители сканируют QR с телефонов.
+После Шага 10 у тебя живой `https://xn----7sbbaje0bckkpaqddfksce7m4g.xn--p1ai`. Можно отдавать наставникам в Челнах. На пробных уроках они логинятся в `/admin`, создают сессии, родители сканируют QR с телефонов.
